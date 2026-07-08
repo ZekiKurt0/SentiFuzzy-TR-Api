@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SentiFuzzy-TR — Türkçe Duygu Analiz Cihazı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#E7E4DA;
+    --paper-shadow:#CFCBBD;
+    --panel:#BABEB4;
+    --panel-hi:#CDD1C6;
+    --panel-lo:#93978C;
+    --bezel:#24261F;
+    --bezel-hi:#3A3D33;
+    --ink:#22241F;
+    --ink-soft:#55584E;
+    --lcd-bg:#171712;
+    --lcd-glow:#FFB347;
+    --lcd-glow-dim:#7A5A2A;
+    --led-pos:#4E9A63;
+    --led-pos-on:#5FD87F;
+    --led-notr:#B9922E;
+    --led-notr-on:#F2C64C;
+    --led-neg:#A24A45;
+    --led-neg-on:#EE5C52;
+    --focus:#3D6E9E;
+    --radius-panel: 22px;
+    --radius-inset: 10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top, #EEEBE1 0%, var(--paper) 55%, var(--paper-shadow) 100%);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px 64px;
+  }
+
+  .device{
+    width:100%;
+    max-width:560px;
+    background:linear-gradient(155deg, var(--panel-hi), var(--panel) 45%, var(--panel-lo));
+    border-radius:var(--radius-panel);
+    padding:20px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 -1px 0 rgba(0,0,0,.15) inset,
+      0 22px 40px -18px rgba(20,20,15,.45),
+      0 4px 10px rgba(20,20,15,.18);
+    position:relative;
+  }
+
+  .device::before{
+    /* brushed-metal texture */
+    content:"";
+    position:absolute;inset:0;
+    border-radius:var(--radius-panel);
+    background-image:repeating-linear-gradient(
+      100deg, rgba(255,255,255,.05) 0px, rgba(255,255,255,.05) 1px,
+      rgba(0,0,0,.025) 1px, rgba(0,0,0,.025) 2px
+    );
+    pointer-events:none;
+  }
+
+  .screws span{
+    position:absolute; width:10px; height:10px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #E4E2D8, #86887E 70%, #55564C);
+    box-shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+  .screws span::after{
+    content:"";position:absolute;top:50%;left:50%;width:6px;height:1.4px;
+    background:#3d3e37;transform:translate(-50%,-50%) rotate(38deg);
+  }
+  .screws .tl{top:12px;left:12px;} .screws .tr{top:12px;right:12px;}
+  .screws .bl{bottom:12px;left:12px;} .screws .br{bottom:12px;right:12px;}
+
+  /* ---------- Brand plaque ---------- */
+  .plaque{
+    text-align:center;
+    padding:6px 8px 16px;
+    position:relative;
+  }
+  .plaque .brand{
+    font-family:'Oswald', sans-serif;
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:.06em;
+    color:var(--bezel);
+    text-shadow:0 1px 0 rgba(255,255,255,.5);
+    margin:0;
+  }
+  .plaque .brand em{
+    font-style:normal;
+    color:#8C5A2E;
+  }
+  .plaque .tagline{
+    font-family:'Oswald', sans-serif;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:4px 0 0;
+  }
+  .badge-fuzzy{
+    position:absolute; top:2px; right:6px;
+    font-family:'Oswald', sans-serif;
+    font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:#fff; background:var(--bezel);
+    padding:3px 7px; border-radius:3px;
+    box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
+  }
+
+  /* ---------- Bezel / screen housing ---------- */
+  .bezel{
+    background:linear-gradient(160deg, var(--bezel-hi), var(--bezel));
+    border-radius:var(--radius-inset);
+    padding:16px;
+    box-shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 6px 14px -8px rgba(0,0,0,.6);
+  }
+
+  label.field-label{
+    display:block;
+    font-family:'Oswald', sans-serif;
+    font-size:10.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#B9BCB0;
+    margin-bottom:6px;
+  }
+
+  textarea{
+    width:100%;
+    min-height:88px;
+    resize:vertical;
+    background:var(--lcd-bg);
+    color:#E9E4D6;
+    border:1px solid #050503;
+    border-radius:6px;
+    padding:12px 12px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:14.5px;
+    line-height:1.45;
+    box-shadow:0 2px 6px rgba(0,0,0,.5) inset;
+  }
+  textarea::placeholder{color:#6c6a5c;}
+  textarea:focus-visible{
+    outline:2px solid var(--focus);
+    outline-offset:2px;
+  }
+
+  .run-btn{
+    margin-top:12px;
+    width:100%;
+    font-family:'Oswald', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#F4F1E6;
+    background:linear-gradient(180deg, #8C5A2E, #6E4322);
+    border:1px solid #3E2712;
+    border-radius:8px;
+    padding:12px 16px;
+    cursor:pointer;
+    box-shadow:0 2px 0 #3E2712, 0 4px 10px rgba(0,0,0,.35);
+    transition:transform .06s ease, box-shadow .06s ease;
+  }
+  .run-btn:hover{filter:brightness(1.06);}
+  .run-btn:active{
+    transform:translateY(2px);
+    box-shadow:0 0 0 #3E2712, 0 2px 6px rgba(0,0,0,.35);
+  }
+  .run-btn:focus-visible{outline:2px solid #fff; outline-offset:3px;}
+  .run-btn:disabled{opacity:.6; cursor:progress;}
+
+  .error-msg{
+    margin-top:10px;
+    font-size:12.5px;
+    color:#F3A6A0;
+    font-family:'Share Tech Mono', monospace;
+    display:none;
+  }
+
+  /* ---------- Readout section ---------- */
+  .readout{
+    margin-top:16px;
+    background:linear-gradient(160deg, var(--bezel-hi), var(--bezel));
+    border-radius:var(--radius-inset);
+    padding:18px 16px 16px;
+    box-shadow:0 1px 0 rgba(255,255,255,.08) inset, 0 6px 14px -8px rgba(0,0,0,.6);
+    display:none;
+  }
+  .readout.is-visible{display:block;}
+
+  .gauge-row{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+
+  .gauge{width:150px; flex-shrink:0;}
+  .gauge svg{width:100%; height:auto; display:block;}
+  .needle{ transform-origin:75px 75px; transition:transform .7s cubic-bezier(.22,1,.36,1); }
+  @media (prefers-reduced-motion: reduce){ .needle{transition:none;} }
+
+  .lcd{
+    flex:1;
+    background:var(--lcd-bg);
+    border-radius:6px;
+    border:1px solid #050503;
+    padding:10px 12px;
+    box-shadow:0 2px 6px rgba(0,0,0,.5) inset;
+  }
+  .lcd .lcd-label{
+    font-family:'Oswald', sans-serif;
+    font-size:9.5px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--lcd-glow-dim);
+  }
+  .lcd .lcd-value{
+    font-family:'Share Tech Mono', monospace;
+    font-size:30px;
+    color:var(--lcd-glow);
+    text-shadow:0 0 6px rgba(255,179,71,.55);
+    line-height:1.1;
+  }
+  .lcd .lcd-sub{
+    font-family:'Share Tech Mono', monospace;
+    font-size:11.5px;
+    color:#D8B27B;
+    margin-top:2px;
+  }
+
+  .leds{
+    display:flex;
+    justify-content:space-between;
+    margin-top:16px;
+    padding:0 4px;
+  }
+  .led-unit{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    font-family:'Oswald', sans-serif;
+    font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+    color:#B9BCB0;
+  }
+  .led{
+    width:13px; height:13px; border-radius:50%;
+    background:#3a3a32;
+    box-shadow:0 1px 2px rgba(0,0,0,.6) inset;
+  }
+  .led.on.pos{background:var(--led-pos-on); box-shadow:0 0 8px 2px rgba(95,216,127,.75);}
+  .led.on.notr{background:var(--led-notr-on); box-shadow:0 0 8px 2px rgba(242,198,76,.75);}
+  .led.on.neg{background:var(--led-neg-on); box-shadow:0 0 8px 2px rgba(238,92,82,.75);}
+
+  .meter-block{margin-top:16px;}
+  .meter-block .meter-label{
+    display:flex; justify-content:space-between;
+    font-family:'Oswald', sans-serif;
+    font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+    color:#B9BCB0; margin-bottom:5px;
+  }
+  .meter-track{
+    height:9px; border-radius:5px;
+    background:#05050380;
+    box-shadow:0 1px 2px rgba(0,0,0,.6) inset;
+    overflow:hidden;
+  }
+  .meter-fill{
+    height:100%; border-radius:5px;
+    background:linear-gradient(90deg, #7A5A2A, var(--lcd-glow));
+    width:0%;
+    transition:width .7s cubic-bezier(.22,1,.36,1);
+  }
+  @media (prefers-reduced-motion: reduce){ .meter-fill{transition:none;} }
+  .meter-note{
+    font-family:'Share Tech Mono', monospace;
+    font-size:10.5px; color:#8a8a7a; margin-top:4px;
+  }
+
+  .roots-block{margin-top:16px;}
+  .roots-block .field-label{margin-bottom:8px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{
+    font-family:'Share Tech Mono', monospace;
+    font-size:11.5px;
+    color:#E9E4D6;
+    background:#05050350;
+    border:1px solid #3a3a32;
+    border-radius:4px;
+    padding:3px 8px;
+  }
+
+  footer.strip{
+    margin-top:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 4px;
+  }
+  footer.strip .status{
+    font-family:'Share Tech Mono', monospace;
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  footer.strip .dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:#93978C; margin-right:5px; vertical-align:middle;
+  }
+  footer.strip .dot.ready{background:#4E9A63;}
+
+  .sr-only{
+    position:absolute; width:1px;height:1px; padding:0;margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+</style>
+</head>
+<body>
+
+<main class="device" role="main" aria-label="SentiFuzzy-TR duygu analiz cihazı">
+  <div class="screws" aria-hidden="true"><span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span></div>
+
+  <div class="plaque">
+    <span class="badge-fuzzy">Fuzzy&nbsp;Logic</span>
+    <p class="brand">SENTİ<em>FUZZY</em>-TR</p>
+    <p class="tagline">Türkçe Duygu Analiz Cihazı</p>
+  </div>
+
+  <section class="bezel">
+    <label class="field-label" for="text-input">Metin girişi</label>
+    <textarea id="text-input" placeholder="Analiz edilecek Türkçe cümleyi buraya yaz…" aria-describedby="err"></textarea>
+    <button class="run-btn" id="run-btn" type="button">▶ Analiz Et</button>
+    <p class="error-msg" id="err" role="alert"></p>
+  </section>
+
+  <section class="readout" id="readout" aria-live="polite">
+    <div class="gauge-row">
+      <div class="gauge" aria-hidden="true">
+        <svg viewBox="0 0 150 90">
+          <path d="M 12 78 A 63 63 0 0 1 138 78" fill="none" stroke="#050503" stroke-width="14" stroke-linecap="round"/>
+          <path d="M 12 78 A 63 63 0 0 1 48 20" fill="none" stroke="var(--led-neg)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M 48 20 A 63 63 0 0 1 102 20" fill="none" stroke="var(--led-notr)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M 102 20 A 63 63 0 0 1 138 78" fill="none" stroke="var(--led-pos)" stroke-width="14" stroke-linecap="round"/>
+          <g class="needle" id="needle">
+            <line x1="75" y1="78" x2="75" y2="24" stroke="#E9E4D6" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="75" cy="78" r="6.5" fill="#E9E4D6" stroke="#050503" stroke-width="1.5"/>
+          </g>
+        </svg>
+      </div>
+      <div class="lcd">
+        <div class="lcd-label">Nihai Karar</div>
+        <div class="lcd-value" id="lcd-class">— — —</div>
+        <div class="lcd-sub" id="lcd-sub">bekleniyor…</div>
+      </div>
+    </div>
+
+    <div class="leds">
+      <div class="led-unit"><span class="led neg" id="led-neg"></span>Negatif</div>
+      <div class="led-unit"><span class="led notr" id="led-notr"></span>Nötr</div>
+      <div class="led-unit"><span class="led pos" id="led-pos"></span>Pozitif</div>
+    </div>
+
+    <div class="meter-block">
+      <div class="meter-label"><span>BERTürk Güven Skoru</span><span id="bert-pct">—</span></div>
+      <div class="meter-track"><div class="meter-fill" id="bert-fill"></div></div>
+      <div class="meter-note" id="bert-note">model durumu bekleniyor…</div>
+    </div>
+
+    <div class="roots-block">
+      <label class="field-label">Zeyrek Kök Çıkarımı</label>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <footer class="strip">
+    <span class="status" id="status"><span class="dot" id="status-dot"></span>hazır</span>
+    <span class="status">/predict</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  const input   = document.getElementById('text-input');
+  const btn     = document.getElementById('run-btn');
+  const errBox  = document.getElementById('err');
+  const readout = document.getElementById('readout');
+  const needle  = document.getElementById('needle');
+  const lcdClass= document.getElementById('lcd-class');
+  const lcdSub  = document.getElementById('lcd-sub');
+  const bertPct = document.getElementById('bert-pct');
+  const bertFill= document.getElementById('bert-fill');
+  const bertNote= document.getElementById('bert-note');
+  const chips   = document.getElementById('chips');
+  const statusEl= document.getElementById('status');
+  const statusDot=document.getElementById('status-dot');
+  const leds = {
+    'Negatif': document.getElementById('led-neg'),
+    'Nötr':    document.getElementById('led-notr'),
+    'Pozitif': document.getElementById('led-pos'),
+  };
+  const ledClass = { 'Negatif':'neg', 'Nötr':'notr', 'Pozitif':'pos' };
+
+  function setNeedle(score){
+    // score: 0-100 -> -85deg .. +85deg
+    const clamped = Math.max(0, Math.min(100, score));
+    const deg = -85 + (clamped/100)*170;
+    needle.style.transform = 'rotate(' + deg + 'deg)';
+  }
+
+  function resetLeds(){
+    Object.values(leds).forEach(function(el){ el.classList.remove('on'); });
+  }
+
+  async function analyze(){
+    const text = input.value.trim();
+    errBox.style.display = 'none';
+    errBox.textContent = '';
+
+    if(text.length < 2){
+      errBox.textContent = 'En az 2 karakter gir.';
+      errBox.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '… analiz ediliyor';
+    statusEl.innerHTML = '<span class="dot" id="status-dot"></span>çalışıyor';
+
+    try{
+      const res = await fetch('/predict', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({text: text})
+      });
+
+      if(!res.ok){
+        const body = await res.json().catch(function(){ return {}; });
+        throw new Error(body.detail ? JSON.stringify(body.detail) : ('HTTP ' + res.status));
+      }
+
+      const data = await res.json();
+
+      readout.classList.add('is-visible');
+      setNeedle(data.fuzzy_score);
+
+      lcdClass.textContent = data.sentiment_class.toUpperCase();
+      lcdSub.textContent = 'fuzzy: ' + data.fuzzy_score.toFixed(1) + '/100  ·  kaynak: ' +
+        (data.bert_available ? 'BERTürk' : 'Fuzzy Logic (model yok)') +
+        (data.negation_detected ? '  ·  olumsuzlama tespit edildi' : '');
+
+      resetLeds();
+      const activeLed = leds[data.sentiment_class];
+      if(activeLed){ activeLed.classList.add('on'); }
+
+      if(data.bert_available && data.bert_score !== null && data.bert_score !== undefined){
+        const pct = Math.round(data.bert_score * 100);
+        bertPct.textContent = pct + '%';
+        bertFill.style.width = pct + '%';
+        bertNote.textContent = 'BERTürk tahmini: ' + data.bert_label;
+      } else {
+        bertPct.textContent = '—';
+        bertFill.style.width = '0%';
+        bertNote.textContent = 'BERTürk modeli yüklü değil, sadece Fuzzy Logic kullanıldı.';
+      }
+
+      chips.innerHTML = '';
+      (data.roots || []).forEach(function(r){
+        const c = document.createElement('span');
+        c.className = 'chip';
+        c.textContent = r;
+        chips.appendChild(c);
+      });
+
+      statusEl.innerHTML = '<span class="dot ready" id="status-dot"></span>tamam';
+    }catch(e){
+      errBox.textContent = 'Hata: ' + e.message;
+      errBox.style.display = 'block';
+      statusEl.innerHTML = '<span class="dot" id="status-dot"></span>hata';
+    }finally{
+      btn.disabled = false;
+      btn.textContent = '▶ Analiz Et';
+    }
+  }
+
+  btn.addEventListener('click', analyze);
+  input.addEventListener('keydown', function(e){
+    if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ analyze(); }
+  });
+})();
+</script>
+
+</body>
+</html>
