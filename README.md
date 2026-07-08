@@ -59,8 +59,6 @@ app/
   static/
     index.html                    # kullanıcıya yönelik web arayüzü
 data/
-  data_preprocessing.py         # ham veri -> final_set.csv (temizlik dahil)
-  lexicon_tr.json                # duygu sözlüğü (kelime -> poz/neg puan)
   processed/final_set.csv        # eğitime hazır, dengeli, temizlenmiş veri seti
   raw/                            # ham veri (bu repoda YOK, ayrıca indirilmeli)
 train.py                       # Colab/GPU üzerinde çalıştırılacak eğitim scripti
