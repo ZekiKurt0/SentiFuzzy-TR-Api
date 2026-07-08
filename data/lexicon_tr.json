@@ -1,0 +1,27 @@
+{
+  "harika": {"poz": 0.9, "neg": 0.0},
+  "mükemmel": {"poz": 0.95, "neg": 0.0},
+  "muhteşem": {"poz": 0.9, "neg": 0.0},
+  "güzel": {"poz": 0.7, "neg": 0.1},
+  "iyi": {"poz": 0.6, "neg": 0.1},
+  "kaliteli": {"poz": 0.7, "neg": 0.0},
+  "hızlı": {"poz": 0.8, "neg": 0.0},
+  "memnun": {"poz": 0.8, "neg": 0.0},
+  "tavsiye": {"poz": 0.6, "neg": 0.0},
+  "başarılı": {"poz": 0.6, "neg": 0.0},
+
+  "berbat": {"poz": 0.0, "neg": 0.9},
+  "kötü": {"poz": 0.1, "neg": 0.8},
+  "rezalet": {"poz": 0.0, "neg": 0.9},
+  "kırık": {"poz": 0.0, "neg": 0.8},
+  "yavaş": {"poz": 0.0, "neg": 0.7},
+  "eksik": {"poz": 0.0, "neg": 0.7},
+  "iade": {"poz": 0.0, "neg": 0.5},
+  "hayal kırıklığı": {"poz": 0.0, "neg": 0.85},
+  "pişman": {"poz": 0.0, "neg": 0.7},
+  "sorun": {"poz": 0.0, "neg": 0.5},
+
+  "kargo": {"poz": 0.0, "neg": 0.0},
+  "ürün": {"poz": 0.0, "neg": 0.0},
+  "ulaşmak": {"poz": 0.3, "neg": 0.0}
+}
